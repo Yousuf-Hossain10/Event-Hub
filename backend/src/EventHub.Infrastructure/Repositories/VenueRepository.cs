@@ -13,6 +13,9 @@ public class VenueRepository(EventHubDbContext context) : IVenueRepository
     public async Task<IReadOnlyList<Venue>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await context.Venues.AsNoTracking().ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<Venue>> GetByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken = default) =>
+        await context.Venues.Where(v => ids.Contains(v.Id)).AsNoTracking().ToListAsync(cancellationToken);
+
     public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default) =>
         context.Venues.AnyAsync(v => v.Id == id, cancellationToken);
 

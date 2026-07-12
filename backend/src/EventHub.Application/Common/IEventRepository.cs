@@ -6,6 +6,10 @@ public interface IEventRepository
 {
     Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Event>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    // Untracked, composable source for GraphQL cursor pagination; callers must apply their own ordering.
+    IQueryable<Event> Query();
+
     Task AddAsync(Event @event, CancellationToken cancellationToken = default);
     void SetOriginalRowVersion(Event @event, byte[] rowVersion);
 

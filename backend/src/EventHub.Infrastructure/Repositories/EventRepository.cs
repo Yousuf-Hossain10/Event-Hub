@@ -13,6 +13,8 @@ public class EventRepository(EventHubDbContext context) : IEventRepository
     public async Task<IReadOnlyList<Event>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await context.Events.AsNoTracking().ToListAsync(cancellationToken);
 
+    public IQueryable<Event> Query() => context.Events.AsNoTracking();
+
     public async Task AddAsync(Event @event, CancellationToken cancellationToken = default) =>
         await context.Events.AddAsync(@event, cancellationToken);
 

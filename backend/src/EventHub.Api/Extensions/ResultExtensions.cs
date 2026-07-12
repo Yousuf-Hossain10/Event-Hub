@@ -1,15 +1,16 @@
-using EventHub.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
+using DomainError = EventHub.Domain.Common.Error;
+using DomainErrorType = EventHub.Domain.Common.ErrorType;
 
 namespace EventHub.Api.Extensions;
 
 public static class ResultExtensions
 {
-    public static ActionResult ToErrorActionResult(this ControllerBase controller, Error error) => error.Type switch
+    public static ActionResult ToErrorActionResult(this ControllerBase controller, DomainError error) => error.Type switch
     {
-        ErrorType.NotFound => controller.NotFound(error.Message),
-        ErrorType.Conflict => controller.Conflict(error.Message),
-        ErrorType.Unprocessable => controller.UnprocessableEntity(error.Message),
+        DomainErrorType.NotFound => controller.NotFound(error.Message),
+        DomainErrorType.Conflict => controller.Conflict(error.Message),
+        DomainErrorType.Unprocessable => controller.UnprocessableEntity(error.Message),
         _ => controller.BadRequest(error.Message)
     };
 }

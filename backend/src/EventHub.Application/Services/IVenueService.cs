@@ -7,6 +7,9 @@ public interface IVenueService
 {
     Task<IReadOnlyList<VenueDto>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<Result<VenueDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    // Backs the GraphQL Event -> Venue DataLoader's batched lookup.
+    Task<IReadOnlyList<VenueDto>> GetByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken = default);
     Task<VenueDto> CreateAsync(CreateVenueDto dto, CancellationToken cancellationToken = default);
     Task<Result<VenueDto>> UpdateAsync(Guid id, UpdateVenueDto dto, CancellationToken cancellationToken = default);
     Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);

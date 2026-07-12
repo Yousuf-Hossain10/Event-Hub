@@ -21,6 +21,12 @@ public class VenueService(IVenueRepository venueRepository) : IVenueService
             : Result.Success(ToDto(venue));
     }
 
+    public async Task<IReadOnlyList<VenueDto>> GetByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var venues = await venueRepository.GetByIdsAsync(ids, cancellationToken);
+        return venues.Select(ToDto).ToList();
+    }
+
     public async Task<VenueDto> CreateAsync(CreateVenueDto dto, CancellationToken cancellationToken = default)
     {
         var venue = new Venue

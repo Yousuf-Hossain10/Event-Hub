@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using EventHub.Api.GraphQL;
+using EventHub.Api.GraphQL.DataLoaders;
 using EventHub.Application;
 using EventHub.Infrastructure;
 
@@ -15,6 +17,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddTypeExtension<EventDtoResolvers>()
+    .AddDataLoader<VenueByIdDataLoader>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,5 +37,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGraphQL();
 
 app.Run();
+
+// Exposed for WebApplicationFactory<Program> in EventHub.IntegrationTests.
+public partial class Program;

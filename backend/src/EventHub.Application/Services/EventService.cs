@@ -13,6 +13,20 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
         return events.Select(ToDto).ToList();
     }
 
+    public IQueryable<EventDto> GetEventsQueryable() =>
+        eventRepository.Query()
+            .OrderBy(e => e.StartDate)
+            .ThenBy(e => e.Id)
+            .Select(e => new EventDto(
+                e.Id,
+                e.Title,
+                e.Description,
+                e.StartDate,
+                e.Capacity,
+                e.Status,
+                e.VenueId,
+                Convert.ToBase64String(e.RowVersion)));
+
     public async Task<Result<EventDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var @event = await eventRepository.GetByIdAsync(id, cancellationToken);
