@@ -16,4 +16,14 @@ public class Booking
 
     public Guid AttendeeId { get; set; }
     public Attendee Attendee { get; set; } = null!;
+
+    public static Booking Create(Guid id, Guid eventId, Guid attendeeId, Guid idempotencyKey) => new()
+    {
+        Id = id,
+        EventId = eventId,
+        AttendeeId = attendeeId,
+        IdempotencyKey = idempotencyKey,
+        Status = BookingStatus.Confirmed,
+        CreatedAt = DateTime.UtcNow
+    };
 }

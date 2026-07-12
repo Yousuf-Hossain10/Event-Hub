@@ -10,6 +10,10 @@ public interface IEventRepository
     // Untracked, composable source for GraphQL cursor pagination; callers must apply their own ordering.
     IQueryable<Event> Query();
 
+    // Pessimistic row lock (SQL Server UPDLOCK/ROWLOCK); must be called inside an active transaction
+    // so the lock is held until commit/rollback, serializing concurrent capacity checks for this event.
+    Task<Event?> GetForBookingAsync(Guid eventId, CancellationToken cancellationToken = default);
+
     Task AddAsync(Event @event, CancellationToken cancellationToken = default);
     void SetOriginalRowVersion(Event @event, byte[] rowVersion);
 

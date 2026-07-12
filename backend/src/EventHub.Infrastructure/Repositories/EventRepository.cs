@@ -15,6 +15,11 @@ public class EventRepository(EventHubDbContext context) : IEventRepository
 
     public IQueryable<Event> Query() => context.Events.AsNoTracking();
 
+    public Task<Event?> GetForBookingAsync(Guid eventId, CancellationToken cancellationToken = default) =>
+        context.Events
+            .FromSqlInterpolated($"SELECT * FROM Events WITH (UPDLOCK, ROWLOCK) WHERE Id = {eventId}")
+            .SingleOrDefaultAsync(cancellationToken);
+
     public async Task AddAsync(Event @event, CancellationToken cancellationToken = default) =>
         await context.Events.AddAsync(@event, cancellationToken);
 

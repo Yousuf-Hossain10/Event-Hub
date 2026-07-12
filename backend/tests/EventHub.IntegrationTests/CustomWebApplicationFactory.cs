@@ -1,3 +1,4 @@
+using EventHub.Domain.Entities;
 using EventHub.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -52,5 +53,24 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         context.Attendees.RemoveRange(context.Attendees.IgnoreQueryFilters());
 
         await context.SaveChangesAsync();
+    }
+
+    // No REST endpoint creates Attendees yet (out of scope for this step); tests seed directly.
+    public async Task<Guid> SeedAttendeeAsync(string name = "Test Attendee")
+    {
+        using var scope = Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<EventHubDbContext>();
+
+        var attendee = new Attendee
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            Email = $"{Guid.NewGuid()}@test.local"
+        };
+
+        context.Attendees.Add(attendee);
+        await context.SaveChangesAsync();
+
+        return attendee.Id;
     }
 }
