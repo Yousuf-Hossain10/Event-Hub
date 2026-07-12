@@ -1,4 +1,4 @@
-using EventHub.Application.Common;
+using EventHub.Api.Extensions;
 using EventHub.Application.DTOs;
 using EventHub.Application.Services;
 using FluentValidation;
@@ -20,8 +20,8 @@ public class EventsController(
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<EventDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var @event = await eventService.GetByIdAsync(id, cancellationToken);
-        return @event is null ? NotFound() : Ok(@event);
+        var result = await eventService.GetByIdAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : this.ToErrorActionResult(result.Error);
     }
 
     [HttpPost]
@@ -38,15 +38,13 @@ public class EventsController(
             return ValidationProblem(ModelState);
         }
 
-        try
+        var result = await eventService.CreateAsync(dto, cancellationToken);
+        if (result.IsFailure)
         {
-            var created = await eventService.CreateAsync(dto, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return this.ToErrorActionResult(result.Error);
         }
-        catch (VenueNotFoundException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -63,21 +61,14 @@ public class EventsController(
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var updated = await eventService.UpdateAsync(id, dto, cancellationToken);
-            return updated is null ? NotFound() : Ok(updated);
-        }
-        catch (VenueNotFoundException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var result = await eventService.UpdateAsync(id, dto, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : this.ToErrorActionResult(result.Error);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = await eventService.DeleteAsync(id, cancellationToken);
-        return deleted ? NoContent() : NotFound();
+        var result = await eventService.DeleteAsync(id, cancellationToken);
+        return result.IsSuccess ? NoContent() : this.ToErrorActionResult(result.Error);
     }
 }

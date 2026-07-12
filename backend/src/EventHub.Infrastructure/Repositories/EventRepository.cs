@@ -16,6 +16,19 @@ public class EventRepository(EventHubDbContext context) : IEventRepository
     public async Task AddAsync(Event @event, CancellationToken cancellationToken = default) =>
         await context.Events.AddAsync(@event, cancellationToken);
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        context.SaveChangesAsync(cancellationToken);
+    public void SetOriginalRowVersion(Event @event, byte[] rowVersion) =>
+        context.Entry(@event).Property(e => e.RowVersion).OriginalValue = rowVersion;
+
+    public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return false;
+        }
+    }
 }

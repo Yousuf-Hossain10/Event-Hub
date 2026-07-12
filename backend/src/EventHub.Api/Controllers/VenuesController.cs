@@ -1,3 +1,4 @@
+using EventHub.Api.Extensions;
 using EventHub.Application.DTOs;
 using EventHub.Application.Services;
 using FluentValidation;
@@ -19,8 +20,8 @@ public class VenuesController(
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<VenueDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var venue = await venueService.GetByIdAsync(id, cancellationToken);
-        return venue is null ? NotFound() : Ok(venue);
+        var result = await venueService.GetByIdAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : this.ToErrorActionResult(result.Error);
     }
 
     [HttpPost]
@@ -55,14 +56,14 @@ public class VenuesController(
             return ValidationProblem(ModelState);
         }
 
-        var venue = await venueService.UpdateAsync(id, dto, cancellationToken);
-        return venue is null ? NotFound() : Ok(venue);
+        var result = await venueService.UpdateAsync(id, dto, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : this.ToErrorActionResult(result.Error);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = await venueService.DeleteAsync(id, cancellationToken);
-        return deleted ? NoContent() : NotFound();
+        var result = await venueService.DeleteAsync(id, cancellationToken);
+        return result.IsSuccess ? NoContent() : this.ToErrorActionResult(result.Error);
     }
 }

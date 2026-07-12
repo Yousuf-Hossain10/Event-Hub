@@ -1,5 +1,6 @@
 using EventHub.Application.Common;
 using EventHub.Application.DTOs;
+using EventHub.Domain.Common;
 using EventHub.Domain.Entities;
 
 namespace EventHub.Application.Services;
@@ -12,10 +13,12 @@ public class VenueService(IVenueRepository venueRepository) : IVenueService
         return venues.Select(ToDto).ToList();
     }
 
-    public async Task<VenueDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<VenueDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var venue = await venueRepository.GetByIdAsync(id, cancellationToken);
-        return venue is null ? null : ToDto(venue);
+        return venue is null
+            ? Result.Failure<VenueDto>(VenueErrors.NotFound(id))
+            : Result.Success(ToDto(venue));
     }
 
     public async Task<VenueDto> CreateAsync(CreateVenueDto dto, CancellationToken cancellationToken = default)
@@ -34,12 +37,12 @@ public class VenueService(IVenueRepository venueRepository) : IVenueService
         return ToDto(venue);
     }
 
-    public async Task<VenueDto?> UpdateAsync(Guid id, UpdateVenueDto dto, CancellationToken cancellationToken = default)
+    public async Task<Result<VenueDto>> UpdateAsync(Guid id, UpdateVenueDto dto, CancellationToken cancellationToken = default)
     {
         var venue = await venueRepository.GetByIdAsync(id, cancellationToken);
         if (venue is null)
         {
-            return null;
+            return Result.Failure<VenueDto>(VenueErrors.NotFound(id));
         }
 
         venue.Name = dto.Name;
@@ -48,21 +51,21 @@ public class VenueService(IVenueRepository venueRepository) : IVenueService
 
         await venueRepository.SaveChangesAsync(cancellationToken);
 
-        return ToDto(venue);
+        return Result.Success(ToDto(venue));
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var venue = await venueRepository.GetByIdAsync(id, cancellationToken);
         if (venue is null)
         {
-            return false;
+            return Result.Failure(VenueErrors.NotFound(id));
         }
 
         venue.IsDeleted = true;
         await venueRepository.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success();
     }
 
     private static VenueDto ToDto(Venue venue) => new(venue.Id, venue.Name, venue.Address, venue.MaxCapacity);

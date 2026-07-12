@@ -9,4 +9,5 @@ public record EventDto(
     DateTime StartDate,
     int Capacity,
     EventStatus Status,
-    Guid VenueId);
+    Guid VenueId,
+    string RowVersion);
