@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventHub.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(EventHubDbContext))]
-    [Migration("20260711175939_InitialCreate")]
+    [Migration("20260711182741_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

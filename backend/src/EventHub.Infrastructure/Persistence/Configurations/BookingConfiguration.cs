@@ -38,5 +38,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .WithMany(a => a.Bookings)
             .HasForeignKey(b => b.AttendeeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(b => !b.IsDeleted);
     }
 }

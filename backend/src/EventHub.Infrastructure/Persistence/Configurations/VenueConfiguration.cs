@@ -29,5 +29,7 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
             .WithOne(e => e.Venue)
             .HasForeignKey(e => e.VenueId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(v => !v.IsDeleted);
     }
 }

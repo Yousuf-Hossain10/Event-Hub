@@ -29,5 +29,7 @@ public class AttendeeConfiguration : IEntityTypeConfiguration<Attendee>
             .WithOne(b => b.Attendee)
             .HasForeignKey(b => b.AttendeeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(a => !a.IsDeleted);
     }
 }
