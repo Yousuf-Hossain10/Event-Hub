@@ -1,0 +1,25 @@
+@if (eventResource.isLoading()) {
+  <p>Loading event...</p>
+} @else if (eventResource.error()) {
+  <p>Failed to load event details.</p>
+} @else if (eventResource.value(); as ev) {
+  <h2>{{ ev.title }}</h2>
+  <p>{{ ev.description }}</p>
+  <ul>
+    <li>Start date: {{ ev.startDate }}</li>
+    <li>Capacity: {{ ev.capacity }}</li>
+    <li>Status: {{ ev.status }}</li>
+  </ul>
+
+  @if (venueResource.isLoading()) {
+    <p>Loading venue...</p>
+  } @else if (venueResource.error()) {
+    <p>Failed to load venue details.</p>
+  } @else if (venueResource.value(); as v) {
+    <h3>Venue</h3>
+    <ul>
+      <li>Name: {{ v.name }}</li>
+      <li>Address: {{ v.address }}</li>
+    </ul>
+  }
+}

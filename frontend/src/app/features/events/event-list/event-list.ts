@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { EventModel } from '../../../core/models/event-model';
 import { EventService } from '../../../core/services/event-service';
 
 @Component({
   selector: 'app-event-list',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './event-list.html',
   styleUrl: './event-list.scss',
 })

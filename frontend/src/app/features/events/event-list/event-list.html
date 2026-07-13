@@ -5,7 +5,11 @@
 } @else {
   <ul>
     @for (event of events(); track event.id) {
-      <li>{{ event.title }} — {{ event.startDate }} — {{ event.status }}</li>
+      <li>
+        <a [routerLink]="['/events', event.id]">
+          {{ event.title }} — {{ event.startDate }} — {{ event.status }}
+        </a>
+      </li>
     }
   </ul>
 }

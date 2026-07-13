@@ -9,7 +9,16 @@
       "Bash(where node *)",
       "Bash(mkdir -p /d/Event-Hub/event-hub/frontend/src/environments)",
       "Skill(run)",
-      "Skill(run:*)"
+      "Skill(run:*)",
+      "Bash(xargs grep -l \"rxResource\")",
+      "Bash(xargs grep -l \"^export declare function resource\\\\|declare function resource\")",
+      "Bash(rm -rf /d/Event-Hub/event-hub/frontend/dist)",
+      "Bash(dotnet run *)",
+      "Bash(netstat -ano)",
+      "Read(//c/Users/mdyou/AppData/Local/Temp/claude/d--Event-Hub-event-hub/bd123021-da88-4948-8181-3f8b3bfb3b33/tasks/**)",
+      "Bash(ls \"/c/Users/mdyou/AppData/Local/Temp/claude/d--Event-Hub-event-hub/bd123021-da88-4948-8181-3f8b3bfb3b33/scratchpad/pw-check/\" 2>&1)",
+      "Read(//c/Users/mdyou/AppData/Local/Temp/claude/d--Event-Hub-event-hub/bd123021-da88-4948-8181-3f8b3bfb3b33/scratchpad/pw-check//**)",
+      "Bash(tail -60 \"/c/Users/mdyou/AppData/Local/Temp/claude/d--Event-Hub-event-hub/bd123021-da88-4948-8181-3f8b3bfb3b33/tasks/bernyhz2w.output\" 2>&1)"
     ],
     "additionalDirectories": [
       "D:\\Event-Hub\\event-hub\\frontend\\src\\environments"
