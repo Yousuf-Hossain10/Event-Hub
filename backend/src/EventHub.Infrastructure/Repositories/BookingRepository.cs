@@ -15,6 +15,11 @@ public class BookingRepository(EventHubDbContext context) : IBookingRepository
     public Task<int> CountConfirmedForEventAsync(Guid eventId, CancellationToken cancellationToken = default) =>
         context.Bookings.CountAsync(b => b.EventId == eventId && b.Status == BookingStatus.Confirmed, cancellationToken);
 
+    public Task<bool> HasConfirmedBookingAsync(Guid eventId, Guid attendeeId, CancellationToken cancellationToken = default) =>
+        context.Bookings.AnyAsync(
+            b => b.EventId == eventId && b.AttendeeId == attendeeId && b.Status == BookingStatus.Confirmed,
+            cancellationToken);
+
     public async Task<BookingCreationOutcome> TryCreateAsync(Booking booking, CancellationToken cancellationToken = default)
     {
         try

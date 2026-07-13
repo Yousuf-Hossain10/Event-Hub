@@ -34,7 +34,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/venues/{{venueId}}",
-            "description": "200 with VenueDto, or 404 if not found / soft-deleted."
+            "description": "200 with VenueDto, or 404 with { code: \"Venue.NotFound\", message: \"...\" } if not found / soft-deleted."
           }
         },
         {
@@ -55,7 +55,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Grand Hall (Renovated)\",\n  \"address\": \"123 Main St, Dhaka\",\n  \"maxCapacity\": 250\n}"
             },
-            "description": "200 with updated VenueDto, or 404 if not found. Venue has no RowVersion — no concurrency conflict possible here."
+            "description": "200 with updated VenueDto, or 404 with { code: \"Venue.NotFound\", message: \"...\" } if not found. Venue has no RowVersion — no concurrency conflict possible here."
           }
         },
         {
@@ -81,7 +81,7 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"Annual Tech Meetup\",\n  \"description\": \"A gathering for local developers.\",\n  \"startDate\": \"2026-09-15T18:00:00Z\",\n  \"capacity\": 2,\n  \"venueId\": \"{{venueId}}\"\n}"
             },
-            "description": "201 with EventDto (includes RowVersion as base64). 422 if venueId doesn't exist. New events are created in Draft status. Save the returned id into {{eventId}} and rowVersion into {{rowVersion}}."
+            "description": "201 with EventDto (includes RowVersion as base64), or 422 with { code: \"Event.VenueNotFound\", message: \"...\" } if venueId doesn't exist. New events are created in Draft status. Save the returned id into {{eventId}} and rowVersion into {{rowVersion}}."
           }
         },
         {
@@ -89,7 +89,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/events/{{eventId}}",
-            "description": "200 with EventDto, or 404 if not found / soft-deleted."
+            "description": "200 with EventDto, or 404 with { code: \"Event.NotFound\", message: \"...\" } if not found / soft-deleted."
           }
         },
         {
@@ -110,7 +110,7 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"Annual Tech Meetup\",\n  \"description\": \"A gathering for local developers.\",\n  \"startDate\": \"2026-09-15T18:00:00Z\",\n  \"capacity\": 2,\n  \"status\": \"Published\",\n  \"rowVersion\": \"{{rowVersion}}\"\n}"
             },
-            "description": "200 with updated EventDto (and a fresh RowVersion — update {{rowVersion}} after each successful call), or:\n- 409 if RowVersion is stale (someone else updated it first)\n- 422 if the status transition is illegal (e.g. Draft → Completed)\n- 400 if RowVersion is malformed"
+            "description": "200 with updated EventDto (and a fresh RowVersion — update {{rowVersion}} after each successful call), or:\n- 409 { code: \"Event.ConcurrencyConflict\", message: \"...\" } if RowVersion is stale (someone else updated it first)\n- 422 { code: \"Event.InvalidStatusTransition\", message: \"...\" } if the status transition is illegal (e.g. Draft → Completed), or { code: \"Event.VenueNotFound\" } if venueId doesn't exist\n- 400 if RowVersion is malformed — this one is FluentValidation, not the Result pattern, so it's a standard ProblemDetails body ({ title, status, errors }), not { code, message }"
           }
         },
         {
@@ -118,7 +118,7 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/events/{{eventId}}",
-            "description": "204 on success, 404 if already gone."
+            "description": "204 on success, or 404 with { code: \"Event.NotFound\", message: \"...\" } if already gone."
           }
         }
       ]
@@ -136,7 +136,7 @@
               "mode": "raw",
               "raw": "{\n  \"eventId\": \"{{eventId}}\",\n  \"attendeeId\": \"{{attendeeId}}\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}"
             },
-            "description": "The only Booking endpoint — no GET/list.\n\nGenerate a fresh GUID for idempotencyKey per NEW booking attempt (e.g. via Postman's {{$guid}} dynamic variable). Re-sending the SAME idempotencyKey returns the original booking again (still 201) rather than creating a duplicate.\n\nPossible responses:\n- 201: booking created (or the original, if idempotencyKey was reused)\n- 422: eventId or attendeeId doesn't exist\n- 409: event is full, OR event isn't open for booking (Draft/Cancelled), OR this attendee already has a non-cancelled booking for this event\n\nNote: attendeeId must be seeded directly via the database — there's no Attendee REST endpoint in this project."
+            "description": "The only Booking endpoint — no GET/list.\n\nGenerate a fresh GUID for idempotencyKey per NEW booking attempt (e.g. via Postman's {{$guid}} dynamic variable). Re-sending the SAME idempotencyKey returns the original booking again (still 201) rather than creating a duplicate.\n\nAll error responses below share the same shape: { \"code\": \"...\", \"message\": \"...\" }. Match on `code` in client code — `message` is for humans/logs and its wording isn't guaranteed stable.\n\nPossible responses:\n- 201: booking created (or the original, if idempotencyKey was reused)\n- 422 { code: \"Booking.EventNotFound\" }: eventId doesn't exist\n- 422 { code: \"Booking.AttendeeNotFound\" }: attendeeId doesn't exist\n- 409 { code: \"Booking.CannotAcceptBooking\" }: event is full, or isn't open for booking (Draft/Cancelled)\n- 409 { code: \"Booking.AlreadyBooked\" }: this attendee already has a confirmed booking for this event\n\nExample error body:\n{\n  \"code\": \"Booking.AlreadyBooked\",\n  \"message\": \"Attendee '11111111-1111-1111-1111-111111111111' already has a confirmed booking for event '...'.\"\n}\n\nNote: attendeeId must be seeded directly via the database — there's no Attendee REST endpoint in this project."
           }
         }
       ]

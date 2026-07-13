@@ -34,6 +34,11 @@ public class BookingService(
             return Result.Failure<BookingDto>(BookingErrors.EventNotFound(dto.EventId));
         }
 
+        if (await bookingRepository.HasConfirmedBookingAsync(dto.EventId, dto.AttendeeId, cancellationToken))
+        {
+            return Result.Failure<BookingDto>(BookingErrors.AlreadyBooked(dto.EventId, dto.AttendeeId));
+        }
+
         var confirmedCount = await bookingRepository.CountConfirmedForEventAsync(dto.EventId, cancellationToken);
         if (!@event.CanAcceptBooking(confirmedCount))
         {

@@ -10,5 +10,8 @@ public interface IBookingRepository
     // for the count to be race-safe.
     Task<int> CountConfirmedForEventAsync(Guid eventId, CancellationToken cancellationToken = default);
 
+    // Same locking requirement as CountConfirmedForEventAsync.
+    Task<bool> HasConfirmedBookingAsync(Guid eventId, Guid attendeeId, CancellationToken cancellationToken = default);
+
     Task<BookingCreationOutcome> TryCreateAsync(Booking booking, CancellationToken cancellationToken = default);
 }

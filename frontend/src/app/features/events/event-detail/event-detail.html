@@ -22,4 +22,33 @@
       <li>Address: {{ v.address }}</li>
     </ul>
   }
+
+  <h3>Book this event</h3>
+  <p>
+    <em>
+      Known simplification: attendee selection is a plain GUID text field for now — there's no
+      attendee picker UI yet.
+    </em>
+  </p>
+  <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()">
+    <label>
+      Attendee GUID
+      <input
+        type="text"
+        formControlName="attendeeId"
+        placeholder="00000000-0000-0000-0000-000000000000"
+      />
+    </label>
+    @if (bookingForm.controls.attendeeId.invalid && bookingForm.controls.attendeeId.touched) {
+      <p>Enter a valid attendee GUID.</p>
+    }
+    <button type="submit" [disabled]="submitting()">Book</button>
+  </form>
+
+  @if (bookingResult(); as booking) {
+    <p>Booking confirmed. Booking id: {{ booking.id }}, status: {{ booking.status }}</p>
+  }
+  @if (bookingErrorMessage(); as message) {
+    <p>{{ message }}</p>
+  }
 }

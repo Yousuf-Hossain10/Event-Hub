@@ -52,14 +52,25 @@ Full reasoning: `docs/adr/ADR-003-concurrency-strategy-per-use-case.md`.
 
 ## 5. Result Pattern — What the Status Codes Mean
 
-Every service method that can fail in an *expected* way (not a crash, a normal business outcome) returns a `Result<T>` rather than throwing. The API layer converts these into HTTP status codes consistently:
+Every service method that can fail in an *expected* way (not a crash, a normal business outcome) returns a `Result<T>` rather than throwing. The API layer converts these into HTTP status codes consistently, and **every** `Result`-derived error response (404 / 409 / 422) has the same JSON body shape:
 
-| Situation | Status | Example |
+```json
+{
+  "code": "Booking.AlreadyBooked",
+  "message": "Attendee '11111111-1111-1111-1111-111111111111' already has a confirmed booking for event '...'."
+}
+```
+
+`code` is stable and is what client code should match against (e.g. to show a distinct message per failure reason, like the booking form in the Angular app does). `message` is human-readable and meant for logs/debugging — its wording isn't guaranteed to stay the same, so don't parse it.
+
+| Situation | Status | Example code(s) |
 |---|---|---|
-| Referenced resource doesn't exist | `404` | GET/PUT/DELETE on an Event id that was never created |
-| Request references something that doesn't exist, but the request itself is well-formed | `422` | Creating an Event with a `venueId` that isn't real |
-| A conflict with current state | `409` | Stale RowVersion on update; Event is full; Attendee already booked |
-| Malformed input | `400` | A RowVersion string that isn't valid base64 |
+| Referenced resource doesn't exist | `404` | `Event.NotFound`, `Venue.NotFound` |
+| Request references something that doesn't exist, but the request itself is well-formed | `422` | `Event.VenueNotFound`, `Event.InvalidStatusTransition`, `Booking.EventNotFound`, `Booking.AttendeeNotFound` |
+| A conflict with current state | `409` | `Event.ConcurrencyConflict` (stale RowVersion), `Booking.CannotAcceptBooking` (event full, or Draft/Cancelled), `Booking.AlreadyBooked` |
+| Malformed input | `400` | *(not a Result error — see below)* |
+
+**`400` is the one exception to the `{ code, message }` shape.** Malformed-input responses (e.g. a RowVersion string that isn't valid base64, or a missing required field) come from FluentValidation via ASP.NET Core's `ValidationProblem(ModelState)`, not from the Result pattern — they use the standard RFC 7807 `ProblemDetails` shape instead: `{ "title": "...", "status": 400, "errors": { "FieldName": ["message"] } }`. Don't expect a `code` field on a `400`.
 
 Exceptions are reserved for things that are genuinely unexpected (a database connection dropping mid-request) — not for "the venue you referenced doesn't exist," which is a normal, anticipated outcome of user input.
 
