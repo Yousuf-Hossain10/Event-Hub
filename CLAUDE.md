@@ -54,6 +54,24 @@ ASP.NET Core 8 Web API
 
 ---
 
+## 3.5 Angular Project Notes (as actually scaffolded)
+
+- Generated via `ng new` with Angular CLI 21.2.19, standalone components, SCSS, routing enabled, no SSR/SSG.
+- Component file naming in this Angular version: `app.ts` / `app.html` / `app.scss` (not the older `app.component.ts` convention). When generating new components, follow whatever naming the Angular CLI produces by default — do not manually rename to the older `.component.ts` style.
+- Folder structure under `src/app/`:
+  - `core/services/` — singleton services that call the backend API (e.g. `event.service.ts`, `booking.service.ts`)
+  - `core/models/` — TypeScript interfaces mirroring backend DTOs (e.g. `event.model.ts` matching `EventDto`)
+  - `core/guards/` — route guards (used from step 8 onward for JWT-protected routes)
+  - `core/interceptors/` — HTTP interceptors (used from step 8 onward to attach the JWT token to outgoing requests)
+  - `features/events/` — event listing/detail components and their local logic
+  - `features/bookings/` — booking flow components
+  - `shared/components/` — small reusable presentational components (e.g. loading spinner, buttons)
+- Use signals for local component state where reasonable. Use Reactive Forms (not template-driven forms) for the booking form.
+- Before assuming zoneless change detection is or isn't active, check `app.config.ts` / `main.ts` for how change detection was configured during scaffolding rather than guessing.
+- REST calls use Angular's `HttpClient`. GraphQL calls (paginated event listing with nested venue data) should use a lightweight approach (plain `HttpClient` POST to `/graphql` with a query string is sufficient — do not introduce Apollo Client or a heavy GraphQL client library unless explicitly asked, to keep the frontend dependency footprint small).
+
+---
+
 ## 4. Domain Model
 
 | Entity | Key Fields | Relationships |

@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "Event Hub API",
+    "description": "REST + GraphQL endpoints for the Event Hub backend (.NET 8 / EF Core / SQL Server). Uses {{baseUrl}} — set this in the environment (e.g. https://localhost:5001).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:5001" },
+    { "key": "venueId", "value": "" },
+    { "key": "eventId", "value": "" },
+    { "key": "attendeeId", "value": "" },
+    { "key": "rowVersion", "value": "" },
+    { "key": "idempotencyKey", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Venues",
+      "item": [
+        {
+          "name": "Create Venue",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/venues",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hall\",\n  \"address\": \"123 Main St, Dhaka\",\n  \"maxCapacity\": 200\n}"
+            },
+            "description": "Returns 201 with the created VenueDto. Save the returned id into {{venueId}} for subsequent requests."
+          }
+        },
+        {
+          "name": "Get Venue By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/venues/{{venueId}}",
+            "description": "200 with VenueDto, or 404 if not found / soft-deleted."
+          }
+        },
+        {
+          "name": "List Venues",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/venues",
+            "description": "200 with a flat array of VenueDto. No pagination on REST (cursor pagination is a GraphQL-only concern for Events)."
+          }
+        },
+        {
+          "name": "Update Venue",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/venues/{{venueId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hall (Renovated)\",\n  \"address\": \"123 Main St, Dhaka\",\n  \"maxCapacity\": 250\n}"
+            },
+            "description": "200 with updated VenueDto, or 404 if not found. Venue has no RowVersion — no concurrency conflict possible here."
+          }
+        },
+        {
+          "name": "Delete Venue (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/venues/{{venueId}}",
+            "description": "204 on success. Sets IsDeleted = true; row is retained. Subsequent GET/List calls will no longer show it due to the global query filter."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/events",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Tech Meetup\",\n  \"description\": \"A gathering for local developers.\",\n  \"startDate\": \"2026-09-15T18:00:00Z\",\n  \"capacity\": 2,\n  \"venueId\": \"{{venueId}}\"\n}"
+            },
+            "description": "201 with EventDto (includes RowVersion as base64). 422 if venueId doesn't exist. New events are created in Draft status. Save the returned id into {{eventId}} and rowVersion into {{rowVersion}}."
+          }
+        },
+        {
+          "name": "Get Event By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/events/{{eventId}}",
+            "description": "200 with EventDto, or 404 if not found / soft-deleted."
+          }
+        },
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/events",
+            "description": "200 with a flat array of EventDto. For paginated/nested (with Venue) queries, use the GraphQL endpoint instead."
+          }
+        },
+        {
+          "name": "Update Event (Change Status / Fields)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/events/{{eventId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Tech Meetup\",\n  \"description\": \"A gathering for local developers.\",\n  \"startDate\": \"2026-09-15T18:00:00Z\",\n  \"capacity\": 2,\n  \"status\": \"Published\",\n  \"rowVersion\": \"{{rowVersion}}\"\n}"
+            },
+            "description": "200 with updated EventDto (and a fresh RowVersion — update {{rowVersion}} after each successful call), or:\n- 409 if RowVersion is stale (someone else updated it first)\n- 422 if the status transition is illegal (e.g. Draft → Completed)\n- 400 if RowVersion is malformed"
+          }
+        },
+        {
+          "name": "Delete Event (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/events/{{eventId}}",
+            "description": "204 on success, 404 if already gone."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\",\n  \"attendeeId\": \"{{attendeeId}}\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}"
+            },
+            "description": "The only Booking endpoint — no GET/list.\n\nGenerate a fresh GUID for idempotencyKey per NEW booking attempt (e.g. via Postman's {{$guid}} dynamic variable). Re-sending the SAME idempotencyKey returns the original booking again (still 201) rather than creating a duplicate.\n\nPossible responses:\n- 201: booking created (or the original, if idempotencyKey was reused)\n- 422: eventId or attendeeId doesn't exist\n- 409: event is full, OR event isn't open for booking (Draft/Cancelled), OR this attendee already has a non-cancelled booking for this event\n\nNote: attendeeId must be seeded directly via the database — there's no Attendee REST endpoint in this project."
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "Paginated Events with Nested Venue",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/graphql",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { events(first: 5) { nodes { id title status rowVersion venue { name address } } pageInfo { hasNextPage hasPreviousPage } } }\"\n}"
+            },
+            "description": "Cursor pagination via 'first'/'after' args (HotChocolate [UsePaging]). Nested venue field is resolved via a batching DataLoader — confirm in server logs it's a single SQL query per page, not one-per-event."
+          }
+        },
+        {
+          "name": "Event By Id",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/graphql",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($id: UUID!) { eventById(id: $id) { id title status venue { name } } }\",\n  \"variables\": { \"id\": \"{{eventId}}\" }\n}"
+            },
+            "description": "Reuses the same IEventService.GetByIdAsync as REST. A nonexistent id surfaces the same NotFound message via GraphQL's errors array (not an exception/crash)."
+          }
+        },
+        {
+          "name": "Next Page (cursor continuation)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/graphql",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($cursor: String!) { events(first: 5, after: $cursor) { nodes { id title } pageInfo { hasNextPage hasPreviousPage } } }\",\n  \"variables\": { \"cursor\": \"PASTE_endCursor_FROM_PREVIOUS_RESPONSE\" }\n}"
+            },
+            "description": "Take the endCursor from the previous query's pageInfo and paste it here to fetch the next page."
+          }
+        }
+      ]
+    }
+  ]
+}
