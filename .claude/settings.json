@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build *)",
-      "Bash(dotnet test *)"
+      "Bash(dotnet test *)",
+      "Bash(npx ng *)",
+      "PowerShell(Get-Command node, npm -ErrorAction SilentlyContinue)",
+      "Read(//c/Program Files/nodejs/**)",
+      "Bash(where node *)",
+      "Bash(mkdir -p /d/Event-Hub/event-hub/frontend/src/environments)",
+      "Skill(run)",
+      "Skill(run:*)"
+    ],
+    "additionalDirectories": [
+      "D:\\Event-Hub\\event-hub\\frontend\\src\\environments"
     ]
   }
 }

@@ -1,0 +1,11 @@
+@if (loading()) {
+  <p>Loading events...</p>
+} @else if (error()) {
+  <p>{{ error() }}</p>
+} @else {
+  <ul>
+    @for (event of events(); track event.id) {
+      <li>{{ event.title }} — {{ event.startDate }} — {{ event.status }}</li>
+    }
+  </ul>
+}
