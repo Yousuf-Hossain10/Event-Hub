@@ -15,6 +15,15 @@ public class BookingRepository(EventHubDbContext context) : IBookingRepository
     public Task<int> CountConfirmedForEventAsync(Guid eventId, CancellationToken cancellationToken = default) =>
         context.Bookings.CountAsync(b => b.EventId == eventId && b.Status == BookingStatus.Confirmed, cancellationToken);
 
+    public async Task<IReadOnlyDictionary<Guid, int>> CountConfirmedByEventIdsAsync(
+        IReadOnlyList<Guid> eventIds,
+        CancellationToken cancellationToken = default) =>
+        await context.Bookings
+            .Where(b => eventIds.Contains(b.EventId) && b.Status == BookingStatus.Confirmed)
+            .GroupBy(b => b.EventId)
+            .Select(g => new { EventId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.EventId, x => x.Count, cancellationToken);
+
     public Task<bool> HasConfirmedBookingAsync(Guid eventId, Guid attendeeId, CancellationToken cancellationToken = default) =>
         context.Bookings.AnyAsync(
             b => b.EventId == eventId && b.AttendeeId == attendeeId && b.Status == BookingStatus.Confirmed,

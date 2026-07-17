@@ -2,15 +2,23 @@ using EventHub.Application.Common;
 using EventHub.Application.DTOs;
 using EventHub.Domain.Common;
 using EventHub.Domain.Entities;
+using EventHub.Domain.Enums;
 
 namespace EventHub.Application.Services;
 
-public class EventService(IEventRepository eventRepository, IVenueRepository venueRepository) : IEventService
+public class EventService(
+    IEventRepository eventRepository,
+    IVenueRepository venueRepository,
+    IBookingRepository bookingRepository) : IEventService
 {
     public async Task<IReadOnlyList<EventDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var events = await eventRepository.GetAllAsync(cancellationToken);
-        return events.Select(ToDto).ToList();
+        var counts = await bookingRepository.CountConfirmedByEventIdsAsync(
+            events.Select(e => e.Id).ToList(),
+            cancellationToken);
+
+        return events.Select(e => ToDto(e, counts.GetValueOrDefault(e.Id))).ToList();
     }
 
     public IQueryable<EventDto> GetEventsQueryable() =>
@@ -25,14 +33,19 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
                 e.Capacity,
                 e.Status,
                 e.VenueId,
-                Convert.ToBase64String(e.RowVersion)));
+                Convert.ToBase64String(e.RowVersion),
+                e.Bookings.Count(b => b.Status == BookingStatus.Confirmed)));
 
     public async Task<Result<EventDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var @event = await eventRepository.GetByIdAsync(id, cancellationToken);
-        return @event is null
-            ? Result.Failure<EventDto>(EventErrors.NotFound(id))
-            : Result.Success(ToDto(@event));
+        if (@event is null)
+        {
+            return Result.Failure<EventDto>(EventErrors.NotFound(id));
+        }
+
+        var confirmedBookingCount = await bookingRepository.CountConfirmedForEventAsync(id, cancellationToken);
+        return Result.Success(ToDto(@event, confirmedBookingCount));
     }
 
     public async Task<Result<EventDto>> CreateAsync(CreateEventDto dto, CancellationToken cancellationToken = default)
@@ -54,7 +67,8 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
         await eventRepository.AddAsync(@event, cancellationToken);
         await eventRepository.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(ToDto(@event));
+        // A brand-new event can't have any bookings yet — no query needed.
+        return Result.Success(ToDto(@event, confirmedBookingCount: 0));
     }
 
     public async Task<Result<EventDto>> UpdateAsync(Guid id, UpdateEventDto dto, CancellationToken cancellationToken = default)
@@ -90,7 +104,8 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
             return Result.Failure<EventDto>(EventErrors.ConcurrencyConflict);
         }
 
-        return Result.Success(ToDto(@event));
+        var confirmedBookingCount = await bookingRepository.CountConfirmedForEventAsync(id, cancellationToken);
+        return Result.Success(ToDto(@event, confirmedBookingCount));
     }
 
     public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -107,7 +122,7 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
         return saved ? Result.Success() : Result.Failure(EventErrors.ConcurrencyConflict);
     }
 
-    private static EventDto ToDto(Event @event) => new(
+    private static EventDto ToDto(Event @event, int confirmedBookingCount) => new(
         @event.Id,
         @event.Title,
         @event.Description,
@@ -115,5 +130,6 @@ public class EventService(IEventRepository eventRepository, IVenueRepository ven
         @event.Capacity,
         @event.Status,
         @event.VenueId,
-        Convert.ToBase64String(@event.RowVersion));
+        Convert.ToBase64String(@event.RowVersion),
+        confirmedBookingCount);
 }

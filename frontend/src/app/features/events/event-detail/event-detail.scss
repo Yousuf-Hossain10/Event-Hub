@@ -62,6 +62,26 @@ $punch-size: 14px;
   }
 }
 
+.event-card__availability {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-family: $font-mono;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+  padding: 0.1rem 0.4rem;
+}
+
+.event-card__availability--open {
+  background: $color-success;
+  color: $color-paper;
+}
+
+.event-card__availability--full {
+  background: $color-danger;
+  color: $color-paper;
+}
+
 .event-card__venue h3,
 .event-card__booking h3 {
   font-family: $font-heading;
@@ -106,13 +126,6 @@ $punch-size: 14px;
   left: 100%;
 }
 
-.event-card__note {
-  font-size: 0.8rem;
-  color: rgba($color-paper, 0.6);
-  font-style: italic;
-  margin: 0 0 1rem;
-}
-
 .booking-form {
   display: flex;
   flex-direction: column;
@@ -141,6 +154,13 @@ $punch-size: 14px;
     background: $color-paper;
     color: $color-ink;
   }
+}
+
+.booking-form__note {
+  font-size: 0.7rem;
+  color: rgba($color-paper, 0.5);
+  font-style: italic;
+  margin: 0;
 }
 
 .booking-form__hint {

@@ -80,7 +80,7 @@ $punch-size: 14px;
 }
 
 .ticket__stub {
-  width: 6.5rem;
+  width: 7.5rem;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -104,8 +104,9 @@ $punch-size: 14px;
 .ticket__capacity {
   font-family: $font-mono;
   font-weight: 600;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .ticket__capacity-label,

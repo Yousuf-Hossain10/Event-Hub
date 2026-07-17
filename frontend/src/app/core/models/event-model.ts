@@ -9,4 +9,5 @@ export interface EventModel {
   status: EventStatus;
   venueId: string;
   rowVersion: string;
+  confirmedBookingCount: number;
 }

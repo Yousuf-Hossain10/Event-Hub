@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -6,7 +7,7 @@ import { EventService } from '../../../core/services/event-service';
 
 @Component({
   selector: 'app-event-list',
-  imports: [RouterLink],
+  imports: [RouterLink, DatePipe],
   templateUrl: './event-list.html',
   styleUrl: './event-list.scss',
 })

@@ -10,4 +10,5 @@ public record EventDto(
     int Capacity,
     EventStatus Status,
     Guid VenueId,
-    string RowVersion);
+    string RowVersion,
+    int ConfirmedBookingCount);

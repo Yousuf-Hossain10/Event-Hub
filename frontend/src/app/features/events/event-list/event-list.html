@@ -7,20 +7,22 @@
     @for (event of events(); track event.id) {
       <li
         class="ticket"
-        [class.ticket--open]="event.status === 'Published'"
-        [class.ticket--closed]="event.status !== 'Published'"
+        [class.ticket--open]="event.confirmedBookingCount < event.capacity"
+        [class.ticket--closed]="event.confirmedBookingCount >= event.capacity"
       >
         <a class="ticket__link" [routerLink]="['/events', event.id]">
           <div class="ticket__main">
             <h3 class="ticket__title">{{ event.title }}</h3>
-            <p class="ticket__date">{{ event.startDate }}</p>
+            <p class="ticket__date">{{ event.startDate | date: 'MMM d, y · h:mm a' }}</p>
             <p class="ticket__status">{{ event.status }}</p>
           </div>
           <div class="ticket__divider" aria-hidden="true"></div>
           <div class="ticket__stub">
-            <span class="ticket__capacity">{{ event.capacity }}</span>
+            <span class="ticket__capacity">{{ event.confirmedBookingCount }} / {{ event.capacity }}</span>
             <span class="ticket__capacity-label">capacity</span>
-            <span class="ticket__badge">{{ event.status === 'Published' ? 'OPEN' : 'FULL' }}</span>
+            <span class="ticket__badge">
+              {{ event.confirmedBookingCount >= event.capacity ? 'FULL' : 'OPEN' }}
+            </span>
           </div>
         </a>
       </li>

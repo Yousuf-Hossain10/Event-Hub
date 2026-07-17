@@ -14,11 +14,20 @@
     <dl class="event-card__meta">
       <div class="event-card__meta-item">
         <dt>Start date</dt>
-        <dd>{{ ev.startDate }}</dd>
+        <dd>{{ ev.startDate | date: 'MMM d, y · h:mm a' }}</dd>
       </div>
       <div class="event-card__meta-item">
         <dt>Capacity</dt>
-        <dd>{{ ev.capacity }}</dd>
+        <dd>
+          {{ ev.confirmedBookingCount }} / {{ ev.capacity }}
+          <span
+            class="event-card__availability"
+            [class.event-card__availability--open]="ev.confirmedBookingCount < ev.capacity"
+            [class.event-card__availability--full]="ev.confirmedBookingCount >= ev.capacity"
+          >
+            {{ ev.confirmedBookingCount >= ev.capacity ? 'FULL' : 'OPEN' }}
+          </span>
+        </dd>
       </div>
     </dl>
 
@@ -38,10 +47,6 @@
 
     <section class="event-card__booking">
       <h3>Book this event</h3>
-      <p class="event-card__note">
-        Known simplification: attendee selection is a plain GUID text field for now — there's no
-        attendee picker UI yet.
-      </p>
       <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="booking-form">
         <label class="booking-form__field">
           Attendee GUID
@@ -51,6 +56,10 @@
             placeholder="00000000-0000-0000-0000-000000000000"
           />
         </label>
+        <p class="booking-form__note">
+          Known simplification: a plain GUID text field for now — there's no attendee picker UI
+          yet.
+        </p>
         @if (bookingForm.controls.attendeeId.invalid && bookingForm.controls.attendeeId.touched) {
           <p class="booking-form__hint">Enter a valid attendee GUID.</p>
         }
