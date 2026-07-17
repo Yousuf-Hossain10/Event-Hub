@@ -1,0 +1,121 @@
+@use 'tokens' as *;
+
+$punch-size: 14px;
+
+.ticket-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticket {
+  border: 1px solid $color-ink;
+  background: $color-paper;
+}
+
+.ticket__link {
+  display: flex;
+  align-items: stretch;
+  text-decoration: none;
+  color: inherit;
+  min-height: 6rem;
+}
+
+.ticket__main {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.ticket__title {
+  font-family: $font-heading;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: $color-ink;
+  margin: 0;
+}
+
+.ticket__date,
+.ticket__status {
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  color: $color-muted;
+  margin: 0;
+}
+
+// Dashed divider with punch-hole notches at the top and bottom, mimicking a ticket perforation.
+.ticket__divider {
+  position: relative;
+  width: 0;
+  border-left: 2px dashed $color-ink;
+  margin: 0.5rem 0;
+}
+
+.ticket__divider::before,
+.ticket__divider::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: $punch-size;
+  height: $punch-size;
+  border-radius: 50%;
+  background: $color-paper;
+  border: 1px solid $color-ink;
+}
+
+.ticket__divider::before {
+  top: 0;
+}
+
+.ticket__divider::after {
+  top: 100%;
+}
+
+.ticket__stub {
+  width: 6.5rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background: $color-ink;
+  color: $color-paper;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.ticket--open .ticket__stub {
+  background: $color-success;
+}
+
+.ticket--closed .ticket__stub {
+  background: $color-danger;
+}
+
+.ticket__capacity {
+  font-family: $font-mono;
+  font-weight: 600;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ticket__capacity-label,
+.ticket__badge {
+  font-family: $font-mono;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticket__badge {
+  font-weight: 600;
+}

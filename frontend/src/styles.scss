@@ -1,1 +1,66 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'tokens' as *;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: $color-paper;
+  color: $color-ink;
+  font-family: $font-body;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: $font-heading;
+  font-weight: 700;
+}
+
+a {
+  color: inherit;
+}
+
+// Shared across EventList / EventDetail for loading and error states.
+.state-message {
+  font-family: $font-mono;
+  font-size: 0.85rem;
+  color: $color-muted;
+}
+
+.state-message--error {
+  color: $color-danger;
+}
+
+// Shared button primitive; components apply a modifier for color.
+.btn {
+  font-family: $font-heading;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid $color-ink;
+  padding: 0.6rem 1.5rem;
+  cursor: pointer;
+  background: $color-paper;
+  color: $color-ink;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--gold {
+  background: $color-gold;
+  border-color: $color-gold;
+  color: $color-ink;
+}

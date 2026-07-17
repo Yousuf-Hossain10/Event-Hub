@@ -1,5 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
+
+import { EventService } from './core/services/event-service';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +11,10 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('event-hub-frontend');
+  private readonly eventService = inject(EventService);
+
+  // Header event count only; reuses the same EventService.getEvents() EventList already calls.
+  protected readonly eventsResource = rxResource({
+    stream: () => this.eventService.getEvents(),
+  });
 }

@@ -1,54 +1,70 @@
 @if (eventResource.isLoading()) {
-  <p>Loading event...</p>
+  <p class="state-message">Loading event...</p>
 } @else if (eventResource.error()) {
-  <p>Failed to load event details.</p>
+  <p class="state-message state-message--error">Failed to load event details.</p>
 } @else if (eventResource.value(); as ev) {
-  <h2>{{ ev.title }}</h2>
-  <p>{{ ev.description }}</p>
-  <ul>
-    <li>Start date: {{ ev.startDate }}</li>
-    <li>Capacity: {{ ev.capacity }}</li>
-    <li>Status: {{ ev.status }}</li>
-  </ul>
+  <article class="event-card">
+    <header class="event-card__header">
+      <h2 class="event-card__title">{{ ev.title }}</h2>
+      <p class="event-card__status">{{ ev.status }}</p>
+    </header>
 
-  @if (venueResource.isLoading()) {
-    <p>Loading venue...</p>
-  } @else if (venueResource.error()) {
-    <p>Failed to load venue details.</p>
-  } @else if (venueResource.value(); as v) {
-    <h3>Venue</h3>
-    <ul>
-      <li>Name: {{ v.name }}</li>
-      <li>Address: {{ v.address }}</li>
-    </ul>
-  }
+    <p class="event-card__description">{{ ev.description }}</p>
 
-  <h3>Book this event</h3>
-  <p>
-    <em>
-      Known simplification: attendee selection is a plain GUID text field for now — there's no
-      attendee picker UI yet.
-    </em>
-  </p>
-  <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()">
-    <label>
-      Attendee GUID
-      <input
-        type="text"
-        formControlName="attendeeId"
-        placeholder="00000000-0000-0000-0000-000000000000"
-      />
-    </label>
-    @if (bookingForm.controls.attendeeId.invalid && bookingForm.controls.attendeeId.touched) {
-      <p>Enter a valid attendee GUID.</p>
+    <dl class="event-card__meta">
+      <div class="event-card__meta-item">
+        <dt>Start date</dt>
+        <dd>{{ ev.startDate }}</dd>
+      </div>
+      <div class="event-card__meta-item">
+        <dt>Capacity</dt>
+        <dd>{{ ev.capacity }}</dd>
+      </div>
+    </dl>
+
+    @if (venueResource.isLoading()) {
+      <p class="state-message">Loading venue...</p>
+    } @else if (venueResource.error()) {
+      <p class="state-message state-message--error">Failed to load venue details.</p>
+    } @else if (venueResource.value(); as v) {
+      <section class="event-card__venue">
+        <h3>Venue</h3>
+        <p>{{ v.name }}</p>
+        <p>{{ v.address }}</p>
+      </section>
     }
-    <button type="submit" [disabled]="submitting()">Book</button>
-  </form>
 
-  @if (bookingResult(); as booking) {
-    <p>Booking confirmed. Booking id: {{ booking.id }}, status: {{ booking.status }}</p>
-  }
-  @if (bookingErrorMessage(); as message) {
-    <p>{{ message }}</p>
-  }
+    <div class="event-card__divider" aria-hidden="true"></div>
+
+    <section class="event-card__booking">
+      <h3>Book this event</h3>
+      <p class="event-card__note">
+        Known simplification: attendee selection is a plain GUID text field for now — there's no
+        attendee picker UI yet.
+      </p>
+      <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="booking-form">
+        <label class="booking-form__field">
+          Attendee GUID
+          <input
+            type="text"
+            formControlName="attendeeId"
+            placeholder="00000000-0000-0000-0000-000000000000"
+          />
+        </label>
+        @if (bookingForm.controls.attendeeId.invalid && bookingForm.controls.attendeeId.touched) {
+          <p class="booking-form__hint">Enter a valid attendee GUID.</p>
+        }
+        <button type="submit" class="btn btn--gold" [disabled]="submitting()">Book</button>
+      </form>
+
+      @if (bookingResult(); as booking) {
+        <p class="booking-form__result booking-form__result--success">
+          Booking confirmed. Booking id: {{ booking.id }}, status: {{ booking.status }}
+        </p>
+      }
+      @if (bookingErrorMessage(); as message) {
+        <p class="booking-form__result booking-form__result--error">{{ message }}</p>
+      }
+    </section>
+  </article>
 }

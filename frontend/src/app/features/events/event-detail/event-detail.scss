@@ -1,0 +1,167 @@
+@use 'tokens' as *;
+
+$punch-size: 14px;
+
+.event-card {
+  background: $color-ink;
+  color: $color-paper;
+  border: 1px solid $color-ink;
+  padding: 1.75rem;
+  max-width: 40rem;
+}
+
+.event-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.event-card__title {
+  font-family: $font-heading;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.event-card__status {
+  font-family: $font-mono;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-gold;
+  margin: 0;
+}
+
+.event-card__description {
+  color: rgba($color-paper, 0.85);
+  margin: 0 0 1rem;
+}
+
+.event-card__meta {
+  display: flex;
+  gap: 2.5rem;
+  margin: 0 0 1rem;
+}
+
+.event-card__meta-item {
+  dt {
+    font-family: $font-mono;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba($color-paper, 0.6);
+    margin: 0 0 0.15rem;
+  }
+
+  dd {
+    font-family: $font-mono;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.event-card__venue h3,
+.event-card__booking h3 {
+  font-family: $font-heading;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+  color: $color-paper;
+}
+
+.event-card__venue p {
+  margin: 0;
+  color: rgba($color-paper, 0.85);
+}
+
+// Horizontal counterpart to the ticket-list's dashed divider, with the same punch-hole motif
+// rotated onto its ends.
+.event-card__divider {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed rgba($color-paper, 0.5);
+  margin: 1.5rem 0;
+}
+
+.event-card__divider::before,
+.event-card__divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: $punch-size;
+  height: $punch-size;
+  border-radius: 50%;
+  background: $color-paper;
+  border: 1px solid $color-ink;
+}
+
+.event-card__divider::before {
+  left: 0;
+}
+
+.event-card__divider::after {
+  left: 100%;
+}
+
+.event-card__note {
+  font-size: 0.8rem;
+  color: rgba($color-paper, 0.6);
+  font-style: italic;
+  margin: 0 0 1rem;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.booking-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba($color-paper, 0.7);
+
+  input {
+    font-family: $font-mono;
+    font-size: 0.9rem;
+    text-transform: none;
+    letter-spacing: normal;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid rgba($color-paper, 0.4);
+    background: $color-paper;
+    color: $color-ink;
+  }
+}
+
+.booking-form__hint {
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  color: $color-danger;
+  margin: 0;
+}
+
+.booking-form__result {
+  font-family: $font-mono;
+  font-size: 0.8rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid currentColor;
+}
+
+.booking-form__result--success {
+  color: $color-success;
+}
+
+.booking-form__result--error {
+  color: $color-danger;
+}

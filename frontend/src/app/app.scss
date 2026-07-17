@@ -1,0 +1,35 @@
+@use 'tokens' as *;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $color-ink;
+  color: $color-paper;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid $color-ink;
+}
+
+.app-header__title {
+  font-family: $font-heading;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+.app-header__count {
+  font-family: $font-mono;
+  font-size: 0.8rem;
+  color: $color-gold;
+}
+
+.app-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}

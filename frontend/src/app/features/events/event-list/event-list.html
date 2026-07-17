@@ -1,13 +1,27 @@
 @if (loading()) {
-  <p>Loading events...</p>
+  <p class="state-message">Loading events...</p>
 } @else if (error()) {
-  <p>{{ error() }}</p>
+  <p class="state-message state-message--error">{{ error() }}</p>
 } @else {
-  <ul>
+  <ul class="ticket-list">
     @for (event of events(); track event.id) {
-      <li>
-        <a [routerLink]="['/events', event.id]">
-          {{ event.title }} — {{ event.startDate }} — {{ event.status }}
+      <li
+        class="ticket"
+        [class.ticket--open]="event.status === 'Published'"
+        [class.ticket--closed]="event.status !== 'Published'"
+      >
+        <a class="ticket__link" [routerLink]="['/events', event.id]">
+          <div class="ticket__main">
+            <h3 class="ticket__title">{{ event.title }}</h3>
+            <p class="ticket__date">{{ event.startDate }}</p>
+            <p class="ticket__status">{{ event.status }}</p>
+          </div>
+          <div class="ticket__divider" aria-hidden="true"></div>
+          <div class="ticket__stub">
+            <span class="ticket__capacity">{{ event.capacity }}</span>
+            <span class="ticket__capacity-label">capacity</span>
+            <span class="ticket__badge">{{ event.status === 'Published' ? 'OPEN' : 'FULL' }}</span>
+          </div>
         </a>
       </li>
     }
